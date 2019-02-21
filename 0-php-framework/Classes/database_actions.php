@@ -1,5 +1,7 @@
 <?php
 
+use PHPMailer\PHPMailer\Exception;
+
     require_once 'database_querys.php';
 
     class actions extends querys
@@ -10,20 +12,26 @@
             $this->conn = $conn;
         }
 
-        public function execute_query($str_query, $parameters, $msg_error)
+        public function execute_query($str_query, $parameters)
         {
-            $result =  $this::prepare_query($str_query, $parameters);
-            //$result = $this->conn->prepare($str_query);
-            $result->execute();
-
-            if($result->rowCount() > 0)
+            try
             {
-                return $result->fetchAll(PDO::FETCH_OBJ);
+                $result =  $this::prepare_query($str_query, $parameters);
+                $result->execute();
+    
+                if($result->rowCount() > 0)
+                {
+                    return $result->fetchAll(PDO::FETCH_OBJ);
+                }
+                else
+                {
+                    return 'error';
+                }    
             }
-            else
+            catch (Exception $e)
             {
-                return $msg_error;
-            }    
+                return 'error';
+            }          
         }
 
         public function prepare_query($str_query, $parameters)
@@ -48,16 +56,16 @@
             return $str_query; 
         }
 
-        public function exec_query_read_table($msg_error)
+        public function exec_query_read_table()
         {
-            return $this::execute_query($this->ALL_DATA, '', $msg_error);
+            return $this::execute_query($this->ALL_DATA, '');
         }
 
-        public function exec_query_login($user, $pass, $msg_error)
+        public function exec_query_login($user, $pass)
         {
             $parameters = array($user, $pass);
 
-            return $this::execute_query($this->LOGIN, $parameters, $msg_error);
+            return $this::execute_query($this->LOGIN, $parameters);
         }
 
     }
